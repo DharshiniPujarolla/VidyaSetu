@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
+import { createQuizController } from '@/modules/quiz';
 
-export async function POST() {
-  // TODO: Implement quiz creation
-  return NextResponse.json({ message: 'Not implemented' }, { status: 501 });
+export async function POST(request: Request) {
+  return createQuizController(request);
 }
