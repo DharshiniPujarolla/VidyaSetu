@@ -1,254 +1,148 @@
 # VidyaSetu
 
-AI-Powered Adaptive Study & Assessment Platform
+AI-powered adaptive study and assessment platform for NCERT-based learning.
 
----
+VidyaSetu helps students move from passive studying to structured practice with chapter-wise study material, quiz workflows, subjective answer evaluation, and analytics.
 
-## 🚀 Overview
+## Features
 
-VidyaSetu transforms passive studying into structured, measurable, AI-guided learning.
+- NCERT class, subject, and chapter browsing
+- Chapter-based quiz creation
+- Practice, test, and revision quiz modes
+- Subjective answer evaluation workflow
+- Notes upload and extraction workflow
+- Student dashboard and analytics views
+- Admin flows for NCERT and question management
 
-It is not a quiz generator.  
-It is a structured AI study system.
-
-VidyaSetu combines:
-
-- AI Study Companion
-- Adaptive Quiz Engine
-- Subjective Answer Evaluation
-- Performance Analytics Dashboard
-
-This project is built with a modular architecture and production-ready design.
-
----
-
-## 🎯 Problem Statement
-
-Students:
-
-- Study passively
-- Cannot measure weak areas
-- Don’t get structured evaluation
-- Lack revision tracking
-- Have no unified AI + Practice + Analytics system
-
-VidyaSetu solves this by providing an integrated AI-driven learning ecosystem.
-
----
-
-## 👥 Target Users
-
-Primary Focus:
-
-- Class 9–12 students
-- Board exam students
-- JEE / NEET aspirants
-
----
-
-## 🧠 Core Features
-
-### 1️⃣ Structured Study Mode (NCERT-Based)
-
-Users select:
-
-Class → Subject → Chapter
-
-System generates:
-
-- MCQs
-- Subjective questions
-- Important theory highlights
-- AI explanations
-- Revision summaries
-- Board-style expected questions
-
----
-
-### 2️⃣ Custom Notes Mode
-
-Users can submit:
-
-- Text notes
-- PDF notes (planned)
-- Image notes (future)
-
-System generates:
-
-- MCQs
-- Subjective questions
-- Case-based questions
-- Flashcards
-- Summaries
-
----
-
-### 3️⃣ Practice Modes
-
-- 🟢 Practice Mode (with hints)
-- 🔴 Exam Mode (timer, no hints)
-- 🔁 Adaptive Mode (dynamic difficulty adjustment)
-
----
-
-### 4️⃣ Subjective Answer Evaluation
-
-AI evaluates written answers and provides:
-
-- Score (e.g., out of 5 / 10)
-- Strengths
-- Missing keywords
-- Structural improvements
-- Ideal reference answer
-
----
-
-### 5️⃣ Analytics Dashboard
-
-Tracks:
-
-- Accuracy over time
-- Subject-wise performance
-- Difficulty-level performance
-- Study streaks
-- Attempt history
-- Weak topic detection
-
----
-
-## 🏗 Architecture
-
-VidyaSetu follows a modular, scalable backend structure.
-
-Core Modules:
-
-- Auth
-- NCERT
-- Notes
-- Quiz
-- AI
-- Analytics
-- Admin
-
-The system separates:
-
-- Quiz definition
-- Quiz sessions
-- Question attempts
-- AI generation logs
-- User performance statistics
-
-This ensures scalability and clean data modeling.
-
----
-
-## 🛠 Tech Stack
-
-### Frontend
+## Tech Stack
 
 - Next.js
-- TailwindCSS
-- Chart.js
+- React
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- PostgreSQL
+- NextAuth
+- Cloudinary
 
-### Backend
+## Getting Started
+
+### Prerequisites
 
 - Node.js
-- Express
-- Prisma ORM
-- JWT Authentication
+- pnpm
+- PostgreSQL database
 
+You can use either a hosted PostgreSQL database or a local PostgreSQL database through Docker.
 
-### AI Layer
+## Environment Setup
 
-- Swappable provider architecture
-- Groq / Together / OpenAI compatible
+Create your local environment file:
 
-### Hosting
+```bash
+cp .env.example .env
+```
 
-- Frontend → Vercel
-- Backend → Render
-- Database → MongoDB Atlas
-- File Storage → Cloudinary
+Never commit `.env`. Use your own database credentials and API keys.
 
----
+## Database Setup
 
-## 🔐 Security & Production Standards
+### Option A: Hosted PostgreSQL
 
-- JWT-based authentication
-- Role-based access control
-- Environment variable isolation
-- AI provider abstraction layer
-- Error handling middleware
-- Modular service architecture
+Use this option if you do not have Docker installed.
 
----
+Create a free PostgreSQL database using Supabase, Neon, Railway, or another PostgreSQL provider. Then update these values in `.env`:
 
-## 📊 Database Design (Core Entities)
+```env
+DATABASE_URL="your-hosted-postgresql-url"
+DIRECT_URL="your-direct-postgresql-url"
+```
 
-- User
-- Class
-- Subject
-- Chapter
-- Note
-- Quiz
-- Question
-- QuizSession
-- Attempt
-- SubjectiveAnswer
-- AIGenerationLog
-- UserStats
+For Supabase, `DATABASE_URL` usually points to the pooled connection URL and `DIRECT_URL` points to the direct connection URL used by Prisma migrations.
 
-Analytics are computed efficiently to ensure performance.
+### Option B: Docker PostgreSQL
 
----
+Use this option if you have Docker installed and want a local database.
 
-## 🚀 Roadmap
+Start PostgreSQL:
 
-### Phase 1 (Core Foundation)
+```bash
+docker compose up -d
+```
 
-- Authentication system
-- Structured quiz generation
-- Quiz session tracking
-- Basic analytics dashboard
+The default `.env.example` database URLs already match the Docker database:
 
-### Phase 2
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vidyasetu"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/vidyasetu"
+```
 
-- Subjective answer evaluation
-- Adaptive difficulty engine
-- AI performance suggestions
+## Install And Run
 
-### Phase 3
+Install dependencies:
 
-- Leaderboards
-- Teacher dashboard
-- Study groups
-- Advanced revision engine
+```bash
+pnpm install
+```
 
----
+Generate the Prisma client:
 
-## 📈 Why This Project Matters
+```bash
+pnpm db:generate
+```
 
-VidyaSetu demonstrates:
+Run migrations:
 
-- AI integration in real-world systems
-- Modular backend architecture
-- Analytics-driven product design
-- Adaptive algorithm implementation
-- Full-stack production deployment
-- Scalable system thinking
+```bash
+pnpm db:migrate
+```
 
-This is not a CRUD demo.
-It is a structured AI learning system.
+Seed the database:
 
----
+```bash
+pnpm db:seed
+```
 
-## 🧑‍💻 Author
+Start the development server:
 
-Adarsh  
-Founder & Builder of VidyaSetu
+```bash
+pnpm dev
+```
 
----
+Open `http://localhost:3000`.
 
-## 📜 License
+## Seed Data
 
-MIT License
+The seed script populates your own local or hosted contributor database with NCERT academic classes, subjects, chapters, and direct PDF links.
+
+Contributors do not need access to the maintainer's production database.
+
+## Useful Commands
+
+```bash
+pnpm dev
+pnpm build
+pnpm lint
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed
+pnpm db:studio
+```
+
+## Contributing
+
+1. Fork the repository.
+2. Clone your fork.
+3. Create `.env` from `.env.example`.
+4. Set up PostgreSQL using either hosted PostgreSQL or Docker.
+5. Run migrations and seed your database.
+6. Create a feature branch.
+7. Open a pull request.
+
+Do not request or use production database access for local development.
+
+Please read the [Code of Conduct](CODE_OF_CONDUCT.md) before participating in project spaces.
+
+## License
+
+MIT
