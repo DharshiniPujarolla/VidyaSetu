@@ -10,6 +10,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed:content": "tsx src/prisma/seed-content.ts",
+    "db:seed:all": "pnpm db:seed && pnpm db:seed:content",
     "db:studio": "prisma studio"
   },
   "dependencies": {

@@ -79,13 +79,16 @@ model Subject {
 }
 
 model Chapter {
-  id        String  @id @default(uuid())
-  title     String
-  order     Int
-  subjectId String
-  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  pdf String?
-  topics    Topic[]
+  id            String  @id @default(uuid())
+  title         String
+  order         Int
+  subjectId     String
+  subject       Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  pdf           String?
+  content       String?
+  contentFormat String?
+  contentSource String?
+  topics        Topic[]
 
   @@index([subjectId])
 }

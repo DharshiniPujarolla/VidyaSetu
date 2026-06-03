@@ -229,6 +229,28 @@ The seed script populates your own local or hosted contributor database with NCE
 
 Contributors do not need access to the maintainer's production database.
 
+The repository also includes learner-facing markdown content in `seed-data/learner-md`.
+
+Preview chapter content mapping without writing to the database:
+
+```bash
+CONTENT_SEED_DRY_RUN=true pnpm db:seed:content
+```
+
+To seed chapter content:
+
+```bash
+pnpm db:seed:content
+```
+
+This stores matched markdown in `Chapter.content` with `contentFormat` and `contentSource` metadata. Missing subjects, missing chapters, and title mismatches are skipped with warnings instead of failing the seed.
+
+To run both metadata and content seeds:
+
+```bash
+pnpm db:seed:all
+```
+
 ## CI/CD
 
 This repository uses GitHub Actions.
@@ -269,6 +291,8 @@ pnpm lint
 pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
+pnpm db:seed:content
+pnpm db:seed:all
 pnpm db:studio
 ```
 
