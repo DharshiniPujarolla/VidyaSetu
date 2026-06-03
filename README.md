@@ -229,6 +229,37 @@ The seed script populates your own local or hosted contributor database with NCE
 
 Contributors do not need access to the maintainer's production database.
 
+## CI/CD
+
+This repository uses GitHub Actions.
+
+### CI
+
+The `CI` workflow runs on pull requests and pushes to `main` or `home`.
+
+It checks:
+
+- dependency installation with pnpm
+- Prisma client generation
+- production build
+- non-blocking lint report
+
+The lint report is currently non-blocking because the repo still has existing lint cleanup work tracked separately.
+
+### Vercel Deployments
+
+The Vercel workflows are optional and skip automatically if deployment secrets are not configured.
+
+To enable Vercel preview and production deployments, add these repository secrets:
+
+```txt
+VERCEL_TOKEN
+VERCEL_ORG_ID
+VERCEL_PROJECT_ID
+```
+
+Preview deployments run for pull requests. Production deployments run on pushes to `main` or `home`, and can also be triggered manually from GitHub Actions.
+
 ## Useful Commands
 
 ```bash
