@@ -45,7 +45,7 @@ jobs:
         run: pnpm db:generate
 
       - name: Build application
-        run: pnpm build
+        run: pnpm exec next build
 
   lint-report:
     name: Lint Report
