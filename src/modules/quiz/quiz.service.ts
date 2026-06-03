@@ -1,4 +1,4 @@
-import { quizRepository } from './quiz.repository';
+import { QuizRepository } from './quiz.repository';
 import type {
   CreateQuizInput,
   QuizQuestion,
@@ -15,9 +15,9 @@ const calculateAccuracy = (correctCount: number, totalQuestions: number) => {
   return Number(((correctCount / totalQuestions) * 100).toFixed(2));
 };
 
-export const quizService = {
-  async createQuiz(input: CreateQuizInput) {
-    const user = await quizRepository.findUserById(input.userId);
+export class QuizServices {
+  static async createQuiz(input: CreateQuizInput) {
+    const user = await QuizRepository.findUserById(input.userId);
 
     if (!user) {
       throw new QuizApiError('User not found', 404);
@@ -26,33 +26,33 @@ export const quizService = {
     let questions: QuizQuestion[] = [];
 
     if (input.source === 'CHAPTER') {
-      const chapter = await quizRepository.findChapterById(input.chapterId!);
+      const chapter = await QuizRepository.findChapterById(input.chapterId!);
 
       if (!chapter) {
         throw new QuizApiError('Chapter not found', 404);
       }
 
-      questions = await quizRepository.findQuestionsByChapter(
+      questions = await QuizRepository.findQuestionsByChapter(
         input.chapterId!,
         input.questionCount
       );
     }
 
     if (input.source === 'TOPIC') {
-      const topic = await quizRepository.findTopicById(input.topicId!);
+      const topic = await QuizRepository.findTopicById(input.topicId!);
 
       if (!topic) {
         throw new QuizApiError('Topic not found', 404);
       }
 
-      questions = await quizRepository.findQuestionsByTopic(
+      questions = await QuizRepository.findQuestionsByTopic(
         input.topicId!,
         input.questionCount
       );
     }
 
     if (input.source === 'NOTE') {
-      const note = await quizRepository.findNoteById(
+      const note = await QuizRepository.findNoteById(
         input.noteId!,
         input.userId
       );
@@ -66,7 +66,7 @@ export const quizService = {
       throw new QuizApiError('No questions found for this quiz source', 404);
     }
 
-    const quiz = await quizRepository.createQuiz({
+    const quiz = await QuizRepository.createQuiz({
       userId: input.userId,
       mode: input.mode,
       source: input.source,
@@ -80,10 +80,10 @@ export const quizService = {
       quiz,
       questions,
     };
-  },
+  }
 
-  async startQuiz(input: StartQuizInput) {
-    const quiz = await quizRepository.findQuizById(input.quizId);
+  static async startQuiz(input: StartQuizInput) {
+    const quiz = await QuizRepository.findQuizById(input.quizId);
 
     if (!quiz) {
       throw new QuizApiError('Quiz not found', 404);
@@ -93,7 +93,7 @@ export const quizService = {
       throw new QuizApiError('You are not allowed to start this quiz', 403);
     }
 
-    return quizRepository.createSession({
+    return QuizRepository.createSession({
       userId: input.userId,
       quizId: input.quizId,
       totalQuestions: quiz.questionCount,
@@ -101,10 +101,10 @@ export const quizService = {
       accuracy: 0,
       timeTaken: 0,
     });
-  },
+  }
 
-  async submitQuiz(input: SubmitQuizInput) {
-    const session = await quizRepository.findSessionById(input.sessionId);
+  static async submitQuiz(input: SubmitQuizInput) {
+    const session = await QuizRepository.findSessionById(input.sessionId);
 
     if (!session) {
       throw new QuizApiError('Quiz session not found', 404);
@@ -119,7 +119,7 @@ export const quizService = {
     let totalTimeTaken = 0;
 
     for (const response of input.responses) {
-      const question = await quizRepository.findQuestionById(
+      const question = await QuizRepository.findQuestionById(
         response.questionId
       );
 
@@ -131,7 +131,7 @@ export const quizService = {
       let score: number | null = null;
 
       if (response.selectedOptionId) {
-        const selectedOption = await quizRepository.findOptionById(
+        const selectedOption = await QuizRepository.findOptionById(
           response.selectedOptionId
         );
 
@@ -167,12 +167,12 @@ export const quizService = {
       });
     }
 
-    await quizRepository.createQuestionResponses(responseData);
+    await QuizRepository.createQuestionResponses(responseData);
 
     const totalQuestions = session.totalQuestions || input.responses.length;
     const accuracy = calculateAccuracy(correctCount, totalQuestions);
 
-    const updatedSession = await quizRepository.updateSession(input.sessionId, {
+    const updatedSession = await QuizRepository.updateSession(input.sessionId, {
       correctCount,
       accuracy,
       timeTaken: totalTimeTaken,
@@ -189,5 +189,5 @@ export const quizService = {
         timeTaken: totalTimeTaken,
       },
     };
-  },
-};
+  }
+}

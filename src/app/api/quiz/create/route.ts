@@ -1,5 +1,5 @@
-import { createQuizController } from '@/modules/quiz';
+import { QuizControllers } from '@/modules/quiz/quiz.controller';
 
-export async function POST(request: Request) {
-  return createQuizController(request);
+export async function POST(req: Request) {
+  return QuizControllers.create(req);
 }

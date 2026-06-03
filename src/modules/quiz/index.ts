@@ -1,11 +1,7 @@
-export {
-  createQuizController,
-  startQuizController,
-  submitQuizController,
-} from './quiz.controller';
+export { QuizControllers } from './quiz.controller';
+export { QuizServices } from './quiz.service';
+export { QuizRepository } from './quiz.repository';
 
-export { quizService } from './quiz.service';
-export { quizRepository } from './quiz.repository';
 export type {
   CreateQuizInput,
   QuizQuestion,

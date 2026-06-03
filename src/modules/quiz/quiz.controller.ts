@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
-import { quizService } from './quiz.service';
+import { QuizServices } from './quiz.service';
 import { QuizApiError } from './quiz.types';
 import {
   createQuizSchema,
@@ -45,53 +45,55 @@ const handleQuizError = (error: unknown) => {
   );
 };
 
-export const createQuizController = async (request: Request) => {
-  try {
-    const body = await parseJsonBody(request);
-    const input = createQuizSchema.parse(body);
-    const result = await quizService.createQuiz(input);
+export class QuizControllers {
+  static async create(request: Request) {
+    try {
+      const body = await parseJsonBody(request);
+      const input = createQuizSchema.parse(body);
+      const result = await QuizServices.createQuiz(input);
 
-    return NextResponse.json(
-      {
-        message: 'Quiz created successfully',
+      return NextResponse.json(
+        {
+          message: 'Quiz created successfully',
+          data: result,
+        },
+        { status: 201 }
+      );
+    } catch (error) {
+      return handleQuizError(error);
+    }
+  }
+
+  static async start(request: Request) {
+    try {
+      const body = await parseJsonBody(request);
+      const input = startQuizSchema.parse(body);
+      const result = await QuizServices.startQuiz(input);
+
+      return NextResponse.json(
+        {
+          message: 'Quiz session started successfully',
+          data: result,
+        },
+        { status: 201 }
+      );
+    } catch (error) {
+      return handleQuizError(error);
+    }
+  }
+
+  static async submit(request: Request) {
+    try {
+      const body = await parseJsonBody(request);
+      const input = submitQuizSchema.parse(body);
+      const result = await QuizServices.submitQuiz(input);
+
+      return NextResponse.json({
+        message: 'Quiz submitted successfully',
         data: result,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    return handleQuizError(error);
+      });
+    } catch (error) {
+      return handleQuizError(error);
+    }
   }
-};
-
-export const startQuizController = async (request: Request) => {
-  try {
-    const body = await parseJsonBody(request);
-    const input = startQuizSchema.parse(body);
-    const result = await quizService.startQuiz(input);
-
-    return NextResponse.json(
-      {
-        message: 'Quiz session started successfully',
-        data: result,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    return handleQuizError(error);
-  }
-};
-
-export const submitQuizController = async (request: Request) => {
-  try {
-    const body = await parseJsonBody(request);
-    const input = submitQuizSchema.parse(body);
-    const result = await quizService.submitQuiz(input);
-
-    return NextResponse.json({
-      message: 'Quiz submitted successfully',
-      data: result,
-    });
-  } catch (error) {
-    return handleQuizError(error);
-  }
-};
+}

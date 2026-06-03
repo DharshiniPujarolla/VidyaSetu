@@ -1,29 +1,29 @@
 import type { Prisma } from '@/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 
-export const quizRepository = {
-  findUserById(userId: string) {
+export class QuizRepository {
+  static findUserById(userId: string) {
     return prisma.user.findUnique({
       where: { id: userId },
       select: { id: true },
     });
-  },
+  }
 
-  findChapterById(chapterId: string) {
+  static findChapterById(chapterId: string) {
     return prisma.chapter.findUnique({
       where: { id: chapterId },
       select: { id: true },
     });
-  },
+  }
 
-  findTopicById(topicId: string) {
+  static findTopicById(topicId: string) {
     return prisma.topic.findUnique({
       where: { id: topicId },
       select: { id: true },
     });
-  },
+  }
 
-  findNoteById(noteId: string, userId: string) {
+  static findNoteById(noteId: string, userId: string) {
     return prisma.note.findFirst({
       where: {
         id: noteId,
@@ -32,9 +32,9 @@ export const quizRepository = {
       },
       select: { id: true },
     });
-  },
+  }
 
-  findQuestionsByChapter(chapterId: string, take: number) {
+  static findQuestionsByChapter(chapterId: string, take: number) {
     return prisma.question.findMany({
       where: {
         topic: {
@@ -61,9 +61,9 @@ export const quizRepository = {
         },
       },
     });
-  },
+  }
 
-  findQuestionsByTopic(topicId: string, take: number) {
+  static findQuestionsByTopic(topicId: string, take: number) {
     return prisma.question.findMany({
       where: { topicId },
       take,
@@ -86,32 +86,32 @@ export const quizRepository = {
         },
       },
     });
-  },
+  }
 
-  createQuiz(data: Prisma.QuizUncheckedCreateInput) {
+  static createQuiz(data: Prisma.QuizUncheckedCreateInput) {
     return prisma.quiz.create({ data });
-  },
+  }
 
-  findQuizById(quizId: string) {
+  static findQuizById(quizId: string) {
     return prisma.quiz.findUnique({
       where: { id: quizId },
     });
-  },
+  }
 
-  createSession(data: Prisma.QuizSessionUncheckedCreateInput) {
+  static createSession(data: Prisma.QuizSessionUncheckedCreateInput) {
     return prisma.quizSession.create({ data });
-  },
+  }
 
-  findSessionById(sessionId: string) {
+  static findSessionById(sessionId: string) {
     return prisma.quizSession.findUnique({
       where: { id: sessionId },
       include: {
         quiz: true,
       },
     });
-  },
+  }
 
-  findQuestionById(questionId: string) {
+  static findQuestionById(questionId: string) {
     return prisma.question.findUnique({
       where: { id: questionId },
       select: {
@@ -119,9 +119,9 @@ export const quizRepository = {
         type: true,
       },
     });
-  },
+  }
 
-  findOptionById(optionId: string) {
+  static findOptionById(optionId: string) {
     return prisma.option.findUnique({
       where: { id: optionId },
       select: {
@@ -130,13 +130,15 @@ export const quizRepository = {
         isCorrect: true,
       },
     });
-  },
+  }
 
-  createQuestionResponses(data: Prisma.QuestionResponseCreateManyInput[]) {
+  static createQuestionResponses(
+    data: Prisma.QuestionResponseCreateManyInput[]
+  ) {
     return prisma.questionResponse.createMany({ data });
-  },
+  }
 
-  updateSession(
+  static updateSession(
     sessionId: string,
     data: Prisma.QuizSessionUncheckedUpdateInput
   ) {
@@ -144,5 +146,5 @@ export const quizRepository = {
       where: { id: sessionId },
       data,
     });
-  },
-};
+  }
+}
