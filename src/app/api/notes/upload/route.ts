@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NotesControllers } from '@/modules/notes/notes.controller';
 
-export async function POST() {
-  // TODO: Implement notes upload
-  return NextResponse.json({ message: 'Not implemented' }, { status: 501 });
+export async function POST(request: Request) {
+  return NotesControllers.upload(request);
 }
