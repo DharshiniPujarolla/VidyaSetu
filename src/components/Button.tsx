@@ -10,7 +10,7 @@ function Button({
   hover = '',
 }: {
   text: string;
-  action?: any;
+  action?: React.MouseEventHandler<HTMLButtonElement>;
   color?: string;
   textCol?: string;
   additional?: string;

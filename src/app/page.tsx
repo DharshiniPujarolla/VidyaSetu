@@ -3,6 +3,7 @@ import Button from '@/components/Button';
 import Image from 'next/image';
 import Senv from '../../public/Study environment.png';
 import DV from '../../public/Data visualization.png';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
@@ -139,9 +140,9 @@ export default function Home() {
               100% curriculum alignment. Every question is mapped to the latest
               textbook directives with surgical precision.
             </p>
-            <a href="/ncert" className="underline uppercase font-bold">
+            <Link href="/ncert" className="underline uppercase font-bold">
               Explore Database
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -225,7 +226,6 @@ export default function Home() {
               textCol="text-black"
               hover="hover:bg-white"
               additional=""
-              action=""
             ></Button>
 
             <Button
@@ -234,7 +234,6 @@ export default function Home() {
               color=""
               textCol=""
               hover=""
-              action=""
             ></Button>
           </div>
         </div>
