@@ -66,7 +66,7 @@ const SOURCES: { value: QuizSource; label: string; description: string; icon: Re
 function QuizCreationForm({ className }: { className?: string }) {
   const router = useRouter();
 
-  const [step, setStep] = React.useState<'source' | 'mode' | 'review' | 'submitting'>('source');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const [userClass, setUserClass] = React.useState<number | null>(null);
   const [subjects, setSubjects] = React.useState<SubjectWithChapters[]>([]);
@@ -85,16 +85,27 @@ function QuizCreationForm({ className }: { className?: string }) {
     async function init() {
       try {
         const user = await fetchUserProfile();
+
+        if (cancelled) return;
+
         if (!user.class) {
-          if (!cancelled) setPageError('Please set your class in profile settings before creating a quiz.');
+          setPageError('Please set your class in profile settings before creating a quiz.');
+          setLoading(false);
           return;
         }
 
         const classNum = Number(user.class);
         setUserClass(classNum);
 
-        const subjectsData = await fetchSubjects(String(classNum));
-        if (!cancelled) setSubjects(subjectsData);
+        try {
+          const subjectsData = await fetchSubjects();
+          if (!cancelled) setSubjects(subjectsData);
+        } catch (subjectsErr) {
+          if (!cancelled) {
+            setPageError(subjectsErr instanceof Error ? subjectsErr.message : 'Failed to load subjects');
+          }
+          return;
+        }
       } catch {
         if (!cancelled) setPageError('Failed to load your profile. Please try again.');
       } finally {
@@ -109,12 +120,13 @@ function QuizCreationForm({ className }: { className?: string }) {
   const selectedSubjectData = subjects.find((s) => s.id === selectedSubject);
   const selectedChapterData = selectedSubjectData?.chapters.find((c) => c.id === selectedChapter);
 
-  const canCreate = selectedChapter && selectedMode && questionCount >= 1;
+  const chapterBelongsToSubject = selectedSubjectData?.chapters.some((c) => c.id === selectedChapter);
+  const canCreate = selectedSubject && selectedChapter && chapterBelongsToSubject && selectedMode && questionCount >= 1;
 
   async function handleCreate() {
     if (!canCreate || !userClass) return;
 
-    setStep('submitting');
+    setIsSubmitting(true);
     setSubmitError(null);
 
     try {
@@ -129,7 +141,7 @@ function QuizCreationForm({ className }: { className?: string }) {
       router.push(`/quiz/${result.quiz.id}`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to create quiz');
-      setStep('review');
+      setIsSubmitting(false);
     }
   }
 
@@ -191,7 +203,7 @@ function QuizCreationForm({ className }: { className?: string }) {
             {subjects.length === 0 ? (
               <p className="text-sm text-muted-foreground">No subjects available for your class.</p>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
                 {subjects.map((subject) => {
                   const isExpanded = selectedSubject === subject.id;
                   return (
@@ -284,10 +296,7 @@ function QuizCreationForm({ className }: { className?: string }) {
               <Label>Mode</Label>
               <QuizModeSelector
                 value={selectedMode}
-                onChange={(mode) => {
-                  setSelectedMode(mode);
-                  setStep('mode');
-                }}
+                onChange={setSelectedMode}
               />
             </div>
 
@@ -301,6 +310,7 @@ function QuizCreationForm({ className }: { className?: string }) {
                   type="range"
                   min={1}
                   max={50}
+                  aria-label={`Number of questions: ${questionCount}`}
                   value={questionCount}
                   onChange={(e) => setQuestionCount(Number(e.target.value))}
                   className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
@@ -328,11 +338,11 @@ function QuizCreationForm({ className }: { className?: string }) {
 
           <Button
             size="lg"
-            disabled={step === 'submitting'}
+            disabled={isSubmitting}
             onClick={handleCreate}
             className="w-full"
           >
-            {step === 'submitting' ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
                 Creating Quiz...
