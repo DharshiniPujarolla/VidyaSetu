@@ -13,23 +13,26 @@ export default class AnalyticsRepository {
   }
 
   static async getOverview(userId: string) {
-    const [user, sessionCount, sessions] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          streakCount: true,
-          lastActiveDate: true,
-        },
+    const today = new Date();
+    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    sevenDaysAgo.setUTCHours(0, 0, 0, 0);
+
+    const [userStats, sessionCount, sessions] = await Promise.all([
+      prisma.userStats.findUnique({
+        where: { userId },
       }),
       prisma.quizSession.count({
         where: { userId, completedAt: { not: null } },
       }),
       prisma.quizSession.findMany({
-        where: { userId, completedAt: { not: null } },
-        select: { accuracy: true },
+        where: {
+          userId,
+          completedAt: { gte: sevenDaysAgo },
+        },
+        select: { accuracy: true, completedAt: true },
       }),
     ]);
 
-    return { user, sessionCount, sessions };
+    return { userStats, sessionCount, sessions };
   }
 }

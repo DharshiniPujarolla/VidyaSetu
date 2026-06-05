@@ -1,3 +1,5 @@
+import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@/generated/prisma/client';
 import { QuizRepository } from './quiz.repository';
 import type {
   CreateQuizInput,
@@ -6,6 +8,7 @@ import type {
   SubmitQuizInput,
 } from './quiz.types';
 import { QuizApiError } from './quiz.types';
+import AnalyticsService from '../analytics/analytics.service';
 
 const calculateAccuracy = (correctCount: number, totalQuestions: number) => {
   if (totalQuestions === 0) {
@@ -114,7 +117,7 @@ export class QuizServices {
       throw new QuizApiError('Quiz session is already submitted', 409);
     }
 
-    const responseData = [];
+    const responseData: Prisma.QuestionResponseCreateManyInput[] = [];
     let correctCount = 0;
     let totalTimeTaken = 0;
 
@@ -167,16 +170,33 @@ export class QuizServices {
       });
     }
 
-    await QuizRepository.createQuestionResponses(responseData);
-
     const totalQuestions = session.totalQuestions || input.responses.length;
     const accuracy = calculateAccuracy(correctCount, totalQuestions);
 
-    const updatedSession = await QuizRepository.updateSession(input.sessionId, {
-      correctCount,
-      accuracy,
-      timeTaken: totalTimeTaken,
-      completedAt: new Date(),
+    const updatedSession = await prisma.$transaction(async (tx) => {
+      await QuizRepository.createQuestionResponses(responseData, tx);
+
+      const sess = await QuizRepository.updateSession(
+        input.sessionId,
+        {
+          correctCount,
+          accuracy,
+          timeTaken: totalTimeTaken,
+          completedAt: new Date(),
+        },
+        tx
+      );
+
+      await AnalyticsService.updateStatsAndStreak(
+        session.userId,
+        {
+          totalQuestions,
+          correctCount,
+        },
+        tx
+      );
+
+      return sess;
     });
 
     return {
