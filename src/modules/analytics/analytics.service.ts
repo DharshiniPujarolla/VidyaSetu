@@ -1,7 +1,10 @@
 import { prisma } from '@/lib/prisma';
-import type { Prisma } from '@/generated/prisma/client';
+import type {
+  Prisma,
+  UserStats as PrismaUserStats,
+} from '@/generated/prisma/client';
 import AnalyticsRepository from './analytics.repository';
-import type { StreakData, ActivityDay } from './analytics.types';
+import type { StreakData, ActivityDay, UserStats } from './analytics.types';
 import type { WeakTopicsResponse } from './analytics.types';
 import { WeakTopicAnalyticsError } from './analytics.types';
 import type { z } from 'zod';
@@ -10,7 +13,7 @@ import type { weakTopicsQuerySchema } from './analytics.validator';
 type WeakTopicsParams = z.infer<typeof weakTopicsQuerySchema>;
 
 export default class AnalyticsService {
-  static async analytics(userId: string) {
+  static async analytics(userId: string): Promise<UserStats> {
     const { userStats, sessionCount, sessions } =
       await AnalyticsRepository.getOverview7Days(userId);
 
@@ -80,7 +83,7 @@ export default class AnalyticsService {
     userId: string,
     session: { totalQuestions: number; correctCount: number },
     tx?: Prisma.TransactionClient
-  ) {
+  ): Promise<PrismaUserStats> {
     const client = tx || prisma;
     const today = new Date();
     const getStartOfDay = (date: Date) => {
