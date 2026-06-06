@@ -1,16 +1,17 @@
 'use client';
 
+import ChapterContent, {
+  type ChapterContentData,
+} from '@/components/ChapterContent';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
+import { ChapterPageSkeleton } from '@/components/Skeletons';
 import authFetch from '@/lib/auth/authFetch';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { ChapterPageSkeleton } from '@/components/Skeletons';
+import { useCallback, useEffect, useState } from 'react';
 
-interface CHapterProps {
+interface ChapterProps extends ChapterContentData {
   id: string;
-  order: number;
-  pdf: string;
   subjectId: string;
-  title: string;
 }
 
 export default function NcertChapterPage() {
@@ -20,10 +21,14 @@ export default function NcertChapterPage() {
     chapter: string;
   }>();
 
-  const [chapter, setChapter] = useState<CHapterProps>();
+  const [chapter, setChapter] = useState<ChapterProps | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getChaptr = async () => {
+  const getChapter = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
       const url = `/api/ncert/chapter?chapter=${params.chapter}`;
 
@@ -34,34 +39,37 @@ export default function NcertChapterPage() {
         },
       });
 
+      if (res.status !== 200 || !res.message) {
+        setChapter(null);
+        setError(
+          typeof res.message === 'string'
+            ? res.message
+            : 'The chapter API did not return content for this request.'
+        );
+        return;
+      }
+
       setChapter(res.message);
+    } catch {
+      setChapter(null);
+      setError('Unable to load this chapter. Please try again later.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.chapter]);
 
   useEffect(() => {
-    getChaptr();
-  }, []);
+    getChapter();
+  }, [getChapter]);
 
-  if (isLoading) {
-    return <ChapterPageSkeleton />;
-  }
-
-  
-
-  console.log(chapter)
   return (
-    <main className='flex '>
-      <div className='flex-1'>
-        will come soon here 
-
-      </div>
-      <div className='flex-1'>
-
-      </div>
-    </main>
+    <>
+      <ReadingProgressBar chapterSlug={params.chapter} isLoading={isLoading} />
+      {isLoading ? (
+        <ChapterPageSkeleton />
+      ) : (
+        <ChapterContent chapter={chapter} error={error} />
+      )}
+    </>
   );
 }
-
-

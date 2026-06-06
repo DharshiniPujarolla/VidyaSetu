@@ -1,11 +1,9 @@
 'use client';
 import authFetch from '@/lib/auth/authFetch';
-import { get, METHODS } from 'http';
-import { use, useEffect, useState } from 'react';
-import { object } from 'zod';
+import { useParams } from 'next/navigation';
+import { useEffect, useState, type ReactNode } from 'react';
 import { SubjectCatalogSkeleton } from '@/components/Skeletons';
 
-import { ReactNode } from 'react';
 import {
   Book,
   Zap,
@@ -30,21 +28,45 @@ interface Subjects {
   }[];
 }
 
-export default function page() {
-  const [user, setUser] = useState<any>();
+interface UserResponse {
+  user?: {
+    class?: string | number | null;
+  };
+}
+
+async function fetchUser() {
+  return authFetch({
+    url: '/api/user/getUser',
+    options: {
+      method: 'GET',
+    },
+  }) as Promise<UserResponse>;
+}
+
+async function fetchSubjects(classId: string) {
+  const res = await authFetch({
+    url: `/api/ncert/subjects?classId=${encodeURIComponent(classId)}`,
+    options: {
+      method: 'GET',
+    },
+  });
+
+  if (!Array.isArray(res.message) || res.message.length === 0) {
+    return [];
+  }
+
+  return res.message.map((subject: Subjects) => ({
+    ...subject,
+    chaptersLength: subject.chapters.length,
+  }));
+}
+
+export default function Page() {
+  const params = useParams<{ class: string }>();
+  const [user, setUser] = useState<UserResponse>();
   const [subs, setSubs] = useState<Subjects[]>([]);
-  const [chapter, setChapters] = useState(null);
   const [focusSubject, setFocusSubject] = useState<Subjects>();
   const [isLoading, setIsLoading] = useState(true);
-
-  const getUser = async () => {
-    const url = '/api/user/getUser';
-    const options = {
-      method: 'GET',
-    };
-    const user = await authFetch({ url, options });
-    setUser(user);
-  };
 
   const subjectIcons: Record<string, ReactNode> = {
     Mathematics: <Book />,
@@ -63,30 +85,27 @@ export default function page() {
     Hindi: <Book />,
   };
 
-  const getSubjects = async () => {
-    const url = '/api/ncert/subjects';
-    const options = {
-      method: 'GET',
-    };
-    const res = await authFetch({ url, options });
+  useEffect(() => {
+    let isMounted = true;
 
-    if (res.message.length > 0) {
-      const arr = Object.values(res.message) as Subjects[];
-      const data = arr.map((val) => {
-        return { ...val, chaptersLength: val.chapters.length };
+    Promise.all([fetchUser(), fetchSubjects(params.class)])
+      .then(([nextUser, subjects]) => {
+        if (!isMounted) return;
+
+        setUser(nextUser);
+        setSubs(subjects);
+        setFocusSubject(subjects[0]);
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       });
 
-      setSubs(data);
-      console.log(data);
-      setFocusSubject(arr[0]);
-    }
-  };
-
-  useEffect(() => {
-    Promise.all([getUser(), getSubjects()]).finally(() => {
-      setIsLoading(false);
-    });
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [params.class]);
 
   if (isLoading) {
     return <SubjectCatalogSkeleton />;
@@ -131,16 +150,15 @@ export default function page() {
 
                 <a
                   className="bg-white text-[14px] font-bold p-3 mt-4 text-center hover:bg-primary cursor-pointer hover:text-white transition-all duration-300"
-                  href={`/ncert/${user?.user?.class}/${val.id}`}
+                  href={`/ncert/${params.class}/${val.id}`}
                 >
-                  VIER CURRICULAM
+                  VIEW CURRICULUM
                 </a>
               </div>
             );
           })}
         </div>
       </div>
-
     </div>
   );
 }

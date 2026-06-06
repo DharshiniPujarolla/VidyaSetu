@@ -92,7 +92,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
 
     {
       name: 'Performance',
-      link: '/performance',
+      link: '/dashboard/analytics',
       svg: (
         <svg
           width="32"

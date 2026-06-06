@@ -1,13 +1,11 @@
-import { SetCookies } from '@/lib/auth/cookies';
 import { NcertRepository } from './ncert.repository';
-import UserServices from '../user/user.service';
 
 export class NcertServices {
-  static async getSubjects() {
-    const user = await UserServices.getUser();
+  static async getSubjects(classId: string) {
     const academicClass = await NcertRepository.getAcadmicClass(
-      Number(user?.class)
+      Number(classId)
     );
+
     if (!academicClass || !academicClass.id)
       throw new Error('no academicClass');
     return await NcertRepository.getSubjects(academicClass?.id);

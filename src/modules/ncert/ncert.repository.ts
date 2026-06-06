@@ -21,10 +21,9 @@ export class NcertRepository {
   }
 
   static async getChapters(subjectId: string) {
-    const cleanId = subjectId.replace(/"/g, '');
     return await prisma.subject.findUnique({
       where: {
-        id: cleanId,
+        id: subjectId,
       },
       include: {
         chapters: true,
@@ -33,10 +32,9 @@ export class NcertRepository {
   }
 
   static async getChapter(chapterId: string) {
-    const cleanId = chapterId.replace(/"/g, '');
     return await prisma.chapter.findUnique({
       where: {
-        id: cleanId,
+        id: chapterId,
       },
     });
   }

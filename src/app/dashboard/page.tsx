@@ -1,11 +1,10 @@
 'use client';
 
 import authFetch from '@/lib/auth/authFetch';
-import { METHODS } from 'http';
-import { Song_Myung } from 'next/font/google';
 import { useRouter } from 'next/navigation';
-import { afterEach } from 'node:test';
 import { useEffect, useState } from 'react';
+import { ProgressDashboard } from '@/components/ProgressDashboard';
+import { StreakDashboard } from '@/components/StreakDashboard';
 
 interface UserProps {
   name: string;
@@ -44,7 +43,7 @@ export default function DashboardPage() {
       name: 'Upload Notes',
       brief: 'Convert handwritten pages into structured study guides.',
       action: 'sync',
-      href: `/`,
+      href: `/notes/upload`,
       icon: (
         <svg
           width="18"
@@ -180,7 +179,9 @@ export default function DashboardPage() {
       {/* top */}
       <div className="flex justify-between">
         <div>
-          <p className="text-3xl font-bold">Welcome back, {user?.name ? user.name: user?.email.split("@")[0]}!</p>
+          <p className="text-3xl font-bold">
+            Welcome back, {user?.name ? user.name : user?.email.split('@')[0]}!
+          </p>
 
           <p className="text-[14px] text-accent  font-light ">
             Focus remains your greatest asset. Continue your curriculum below.
@@ -256,52 +257,20 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* performance history */}
+      {/* streak tracking */}
 
-      <div className='flex flex-col gap-4 w-full h-full flex-1'>
+      <div className='flex flex-col gap-4 w-full'>
+        <StreakDashboard />
+      </div>
+
+      {/* learning progress */}
+
+      <div className="flex flex-col gap-4 w-full h-full flex-1">
         <div className="flex justify-between font-bold uppercase text-[12px]">
-          <div>performance history </div>
-          <a href="">view archive</a>
+          <div>learning progress </div>
         </div>
 
-        <div className='bg-accent/40 flex-1 h-full flex justify-center items-center cursor-pointer hover:bg-accent/20 transition-all duration-300'>
-          <p className='font-semibold  '>NO RECORDS YET</p>
-        </div>
-
-        {/* <table>
-          <thead>
-            <tr>
-              <td>subject</td>
-              <td>date</td>
-              <td>score</td>
-              <td>trend</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <p>Introduction to Thermodynamics</p>{' '}
-                <p>Module 4: Entropy Dynamics</p>
-              </td>
-              <td>Oct 24, 2023</td>
-              <td>92%</td>
-              <td>
-                <svg
-                  width="18"
-                  height="10"
-                  viewBox="0 0 18 10"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M0.707697 10L0 9.29232L6.30385 2.93846L10.3039 6.93846L16.3308 1.00001H13V0H18V5.00001H17V1.7077L10.3039 8.40386L6.30385 4.40386L0.707697 10Z"
-                    fill="#16A34A"
-                  />
-                </svg>
-              </td>
-            </tr>
-          </tbody>
-        </table> */}
+        <ProgressDashboard />
       </div>
     </div>
   );

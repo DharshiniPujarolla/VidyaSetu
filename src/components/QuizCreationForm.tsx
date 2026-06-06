@@ -32,7 +32,13 @@ interface SubjectWithChapters {
   chapters: { id: string; title: string; order: number }[];
 }
 
-const SOURCES: { value: QuizSource; label: string; description: string; icon: React.ReactNode; enabled: boolean }[] = [
+const SOURCES: {
+  value: QuizSource;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+  enabled: boolean;
+}[] = [
   {
     value: 'CHAPTER',
     label: 'From Chapter',
@@ -70,9 +76,15 @@ function QuizCreationForm({ className }: { className?: string }) {
 
   const [userClass, setUserClass] = React.useState<number | null>(null);
   const [subjects, setSubjects] = React.useState<SubjectWithChapters[]>([]);
-  const [selectedSubject, setSelectedSubject] = React.useState<string | null>(null);
-  const [selectedChapter, setSelectedChapter] = React.useState<string | null>(null);
-  const [selectedMode, setSelectedMode] = React.useState<QuizMode | null>(null);
+  const [selectedSubject, setSelectedSubject] = React.useState<string | null>(
+    null
+  );
+  const [selectedChapter, setSelectedChapter] = React.useState<string | null>(
+    null
+  );
+  const [selectedMode, setSelectedMode] = React.useState<QuizMode | null>(
+    null
+  );
   const [questionCount, setQuestionCount] = React.useState(10);
 
   const [pageError, setPageError] = React.useState<string | null>(null);
@@ -89,7 +101,9 @@ function QuizCreationForm({ className }: { className?: string }) {
         if (cancelled) return;
 
         if (!user.class) {
-          setPageError('Please set your class in profile settings before creating a quiz.');
+          setPageError(
+            'Please set your class in profile settings before creating a quiz.'
+          );
           setLoading(false);
           return;
         }
@@ -102,26 +116,42 @@ function QuizCreationForm({ className }: { className?: string }) {
           if (!cancelled) setSubjects(subjectsData);
         } catch (subjectsErr) {
           if (!cancelled) {
-            setPageError(subjectsErr instanceof Error ? subjectsErr.message : 'Failed to load subjects');
+            setPageError(
+              subjectsErr instanceof Error
+                ? subjectsErr.message
+                : 'Failed to load subjects'
+            );
           }
           return;
         }
       } catch {
-        if (!cancelled) setPageError('Failed to load your profile. Please try again.');
+        if (!cancelled)
+          setPageError('Failed to load your profile. Please try again.');
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const selectedSubjectData = subjects.find((s) => s.id === selectedSubject);
-  const selectedChapterData = selectedSubjectData?.chapters.find((c) => c.id === selectedChapter);
+  const selectedChapterData = selectedSubjectData?.chapters.find(
+    (c) => c.id === selectedChapter
+  );
 
-  const chapterBelongsToSubject = selectedSubjectData?.chapters.some((c) => c.id === selectedChapter);
-  const canCreate = selectedSubject && selectedChapter && chapterBelongsToSubject && selectedMode && questionCount >= 1;
+  const chapterBelongsToSubject = selectedSubjectData?.chapters.some(
+    (c) => c.id === selectedChapter
+  );
+  const canCreate =
+    selectedSubject &&
+    selectedChapter &&
+    chapterBelongsToSubject &&
+    selectedMode &&
+    questionCount >= 1;
 
   async function handleCreate() {
     if (!canCreate || !userClass) return;
@@ -140,7 +170,9 @@ function QuizCreationForm({ className }: { className?: string }) {
 
       router.push(`/quiz/${result.quiz.id}`);
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to create quiz');
+      setSubmitError(
+        err instanceof Error ? err.message : 'Failed to create quiz'
+      );
       setIsSubmitting(false);
     }
   }
@@ -168,7 +200,9 @@ function QuizCreationForm({ className }: { className?: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Select Source</CardTitle>
-          <CardDescription>Choose where to generate questions from</CardDescription>
+          <CardDescription>
+            Choose where to generate questions from
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="grid gap-3 sm:grid-cols-2">
@@ -181,7 +215,7 @@ function QuizCreationForm({ className }: { className?: string }) {
                   'flex items-start gap-3 rounded-xl border p-4 text-left transition-all',
                   source.enabled
                     ? 'cursor-pointer hover:border-primary/50 hover:bg-accent/50'
-                    : 'cursor-not-allowed opacity-40',
+                    : 'cursor-not-allowed opacity-40'
                 )}
               >
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -189,8 +223,14 @@ function QuizCreationForm({ className }: { className?: string }) {
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium">{source.label}</span>
-                  <span className="text-xs text-muted-foreground">{source.description}</span>
-                  {!source.enabled && <span className="mt-1 text-[10px] font-medium text-amber-600 uppercase tracking-wide">Coming soon</span>}
+                  <span className="text-xs text-muted-foreground">
+                    {source.description}
+                  </span>
+                  {!source.enabled && (
+                    <span className="mt-1 text-[10px] font-medium text-amber-600 uppercase tracking-wide">
+                      Coming soon
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
@@ -201,17 +241,24 @@ function QuizCreationForm({ className }: { className?: string }) {
             <Label>Browse Chapters</Label>
 
             {subjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No subjects available for your class.</p>
+              <p className="text-sm text-muted-foreground">
+                No subjects available for your class.
+              </p>
             ) : (
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
                 {subjects.map((subject) => {
                   const isExpanded = selectedSubject === subject.id;
                   return (
-                    <div key={subject.id} className="overflow-hidden rounded-lg border">
+                    <div
+                      key={subject.id}
+                      className="overflow-hidden rounded-lg border"
+                    >
                       <button
                         type="button"
                         onClick={() => {
-                          setSelectedSubject(isExpanded ? null : subject.id);
+                          setSelectedSubject(
+                            isExpanded ? null : subject.id
+                          );
                           if (!isExpanded) setSelectedChapter(null);
                         }}
                         className={cn(
@@ -238,12 +285,15 @@ function QuizCreationForm({ className }: { className?: string }) {
                             subject.chapters
                               .sort((a, b) => a.order - b.order)
                               .map((chapter) => {
-                                const isSelected = selectedChapter === chapter.id;
+                                const isSelected =
+                                  selectedChapter === chapter.id;
                                 return (
                                   <button
                                     key={chapter.id}
                                     type="button"
-                                    onClick={() => setSelectedChapter(chapter.id)}
+                                    onClick={() =>
+                                      setSelectedChapter(chapter.id)
+                                    }
                                     className={cn(
                                       'flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors',
                                       isSelected
@@ -261,7 +311,9 @@ function QuizCreationForm({ className }: { className?: string }) {
                                     >
                                       {chapter.order}
                                     </span>
-                                    <span className="leading-snug">{chapter.title}</span>
+                                    <span className="leading-snug">
+                                      {chapter.title}
+                                    </span>
                                     {isSelected && (
                                       <span className="ml-auto text-[10px] font-medium uppercase tracking-wide text-primary">
                                         Selected
@@ -303,7 +355,10 @@ function QuizCreationForm({ className }: { className?: string }) {
             {selectedMode && (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="question-count">
-                  Questions: <span className="font-semibold text-foreground">{questionCount}</span>
+                  Questions:{' '}
+                  <span className="font-semibold text-foreground">
+                    {questionCount}
+                  </span>
                 </Label>
                 <input
                   id="question-count"
@@ -312,7 +367,9 @@ function QuizCreationForm({ className }: { className?: string }) {
                   max={50}
                   aria-label={`Number of questions: ${questionCount}`}
                   value={questionCount}
-                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                  onChange={(e) =>
+                    setQuestionCount(Number(e.target.value))
+                  }
                   className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground">
