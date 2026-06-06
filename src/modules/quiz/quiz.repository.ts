@@ -23,17 +23,6 @@ export class QuizRepository {
     });
   }
 
-  static findNoteById(noteId: string, userId: string) {
-    return prisma.note.findFirst({
-      where: {
-        id: noteId,
-        userId,
-        deletedAt: null,
-      },
-      select: { id: true },
-    });
-  }
-
   static findQuestionsByChapter(chapterId: string, take: number) {
     return prisma.question.findMany({
       where: {
@@ -105,25 +94,54 @@ export class QuizRepository {
   static findSessionById(sessionId: string) {
     return prisma.quizSession.findUnique({
       where: { id: sessionId },
+    });
+  }
+
+  static findSessionWithResponses(sessionId: string) {
+    return prisma.quizSession.findUnique({
+      where: { id: sessionId },
       include: {
-        quiz: true,
+        quiz: {
+          select: {
+            id: true,
+            mode: true,
+            source: true,
+          },
+        },
+        responses: {
+          include: {
+            question: {
+              select: {
+                id: true,
+                type: true,
+                difficulty: true,
+                questionText: true,
+                explanation: true,
+                options: {
+                  select: {
+                    id: true,
+                    label: true,
+                    value: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   }
 
-  static findQuestionById(questionId: string) {
-    return prisma.question.findUnique({
-      where: { id: questionId },
-      select: {
-        id: true,
-        type: true,
-      },
+  static findQuestionsByIds(questionIds: string[]) {
+    return prisma.question.findMany({
+      where: { id: { in: questionIds } },
+      select: { id: true },
     });
   }
 
-  static findOptionById(optionId: string) {
-    return prisma.option.findUnique({
-      where: { id: optionId },
+  static findOptionsByIds(optionIds: string[]) {
+    return prisma.option.findMany({
+      where: { id: { in: optionIds } },
       select: {
         id: true,
         questionId: true,
@@ -133,18 +151,82 @@ export class QuizRepository {
   }
 
   static createQuestionResponses(
-    data: Prisma.QuestionResponseCreateManyInput[]
+    data: Prisma.QuestionResponseCreateManyInput[],
+    tx?: Prisma.TransactionClient
   ) {
-    return prisma.questionResponse.createMany({ data });
+    const client = tx || prisma;
+    return client.questionResponse.createMany({ data });
   }
 
   static updateSession(
     sessionId: string,
-    data: Prisma.QuizSessionUncheckedUpdateInput
+    data: Prisma.QuizSessionUncheckedUpdateInput,
+    tx?: Prisma.TransactionClient
   ) {
-    return prisma.quizSession.update({
+    const client = tx || prisma;
+    return client.quizSession.update({
       where: { id: sessionId },
       data,
+    });
+  }
+
+  static getUserSessions(userId: string, page: number, limit: number) {
+    return prisma.quizSession.findMany({
+      where: { userId },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { completedAt: { sort: 'desc', nulls: 'last' } },
+      include: {
+        quiz: {
+          select: {
+            id: true,
+            mode: true,
+            source: true,
+            chapterId: true,
+            topicId: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+  }
+
+  static countUserSessions(userId: string) {
+    return prisma.quizSession.count({ where: { userId } });
+  }
+
+  static getUserStats(userId: string) {
+    return prisma.userStats.findUnique({ where: { userId } });
+  }
+
+  static getAllResponsesWithDifficulty(userId: string) {
+    return prisma.questionResponse.findMany({
+      where: { session: { userId } },
+      select: {
+        isCorrect: true,
+        question: {
+          select: { difficulty: true },
+        },
+      },
+    });
+  }
+
+  static upsertUserStats(
+    userId: string,
+    data: Prisma.UserStatsUncheckedCreateInput
+  ) {
+    return prisma.userStats.upsert({
+      where: { userId },
+      create: data,
+      update: {
+        totalSessions: data.totalSessions,
+        totalQuestions: data.totalQuestions,
+        totalCorrect: data.totalCorrect,
+        overallAccuracy: data.overallAccuracy,
+        easyAccuracy: data.easyAccuracy,
+        mediumAccuracy: data.mediumAccuracy,
+        hardAccuracy: data.hardAccuracy,
+      },
     });
   }
 }

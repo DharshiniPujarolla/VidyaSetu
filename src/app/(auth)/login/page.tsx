@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [err, setErr] = useState<string>('');
-  const router = useRouter();                                              
+  const router = useRouter();
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,6 +34,11 @@ export default function LoginPage() {
     });
 
     const result = await user.json();
+
+    if (!user.ok || !result.user) {
+      setErr(result.message || result.error || 'Login failed. Please check your credentials.');
+      return;
+    }
 
     if (result.user.firstTime) {
       router.push('/profile');

@@ -35,3 +35,34 @@ export type QuizQuestion = {
   explanation: string | null;
   options: SanitizedOption[];
 };
+
+export type CreateQuizResponse = {
+  quiz: {
+    id: string;
+    userId: string;
+    mode: string;
+    source: string;
+    chapterId: string | null;
+    topicId: string | null;
+    noteId: string | null;
+    questionCount: number;
+    createdAt: string;
+  };
+  questions: QuizQuestion[];
+};
+
+export type QuizApiSuccess<T> = {
+  message: string;
+  data: T;
+};
+
+export type QuizApiErrorResponse = {
+  message: string;
+  errors?: unknown;
+};
+
+export type ChapterInfo = {
+  id: string;
+  title: string;
+  order: number;
+};

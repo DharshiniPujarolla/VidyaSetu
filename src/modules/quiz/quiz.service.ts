@@ -1,3 +1,5 @@
+import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@/generated/prisma/client';
 import { QuizRepository } from './quiz.repository';
 import type {
   CreateQuizInput,
@@ -6,6 +8,7 @@ import type {
   SubmitQuizInput,
 } from './quiz.types';
 import { QuizApiError } from './quiz.types';
+import AnalyticsService from '../analytics/analytics.service';
 
 const calculateAccuracy = (correctCount: number, totalQuestions: number) => {
   if (totalQuestions === 0) {
@@ -14,6 +17,15 @@ const calculateAccuracy = (correctCount: number, totalQuestions: number) => {
 
   return Number(((correctCount / totalQuestions) * 100).toFixed(2));
 };
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 export class QuizServices {
   static async createQuiz(input: CreateQuizInput) {
@@ -51,15 +63,15 @@ export class QuizServices {
       );
     }
 
-    if (input.source === 'NOTE') {
-      const note = await QuizRepository.findNoteById(
-        input.noteId!,
-        input.userId
+    if (
+      input.source === 'NOTE' ||
+      input.source === 'CUSTOM' ||
+      input.source === 'AI'
+    ) {
+      throw new QuizApiError(
+        `${input.source} quiz source is not yet supported`,
+        501
       );
-
-      if (!note) {
-        throw new QuizApiError('Note not found', 404);
-      }
     }
 
     if (['CHAPTER', 'TOPIC'].includes(input.source) && questions.length === 0) {
@@ -73,12 +85,12 @@ export class QuizServices {
       chapterId: input.chapterId ?? null,
       topicId: input.topicId ?? null,
       noteId: input.noteId ?? null,
-      questionCount: questions.length || input.questionCount,
+      questionCount: input.questionCount,
     });
 
     return {
       quiz,
-      questions,
+      questions: shuffleArray(questions),
     };
   }
 
@@ -103,6 +115,67 @@ export class QuizServices {
     });
   }
 
+  static async getSession(sessionId: string, userId: string) {
+    const session = await QuizRepository.findSessionWithResponses(sessionId);
+
+    if (!session) {
+      throw new QuizApiError('Quiz session not found', 404);
+    }
+
+    if (session.userId !== userId) {
+      throw new QuizApiError('You are not allowed to view this session', 403);
+    }
+
+    const sanitizedResponses = session.responses.map((r) => ({
+      id: r.id,
+      questionId: r.questionId,
+      selectedOptionId: r.selectedOptionId,
+      subjectiveAnswer: r.subjectiveAnswer,
+      isCorrect: r.isCorrect,
+      score: r.score,
+      timeTaken: r.timeTaken,
+      question: {
+        id: r.question.id,
+        type: r.question.type,
+        difficulty: r.question.difficulty,
+        questionText: r.question.questionText,
+        explanation: r.question.explanation,
+        options: r.question.options,
+      },
+    }));
+
+    return {
+      session: {
+        id: session.id,
+        quizId: session.quizId,
+        totalQuestions: session.totalQuestions,
+        correctCount: session.correctCount,
+        accuracy: session.accuracy,
+        timeTaken: session.timeTaken,
+        startedAt: session.startedAt,
+        completedAt: session.completedAt,
+        quiz: {
+          id: session.quiz.id,
+          mode: session.quiz.mode,
+          source: session.quiz.source,
+        },
+      },
+      responses: sanitizedResponses,
+    };
+  }
+
+  static async getQuizHistory(userId: string, page: number, limit: number) {
+    const safeLimit = Math.min(limit, 50);
+    const sessions = await QuizRepository.getUserSessions(
+      userId,
+      page,
+      safeLimit
+    );
+    const total = await QuizRepository.countUserSessions(userId);
+
+    return { sessions, total, page, limit: safeLimit };
+  }
+
   static async submitQuiz(input: SubmitQuizInput) {
     const session = await QuizRepository.findSessionById(input.sessionId);
 
@@ -110,20 +183,44 @@ export class QuizServices {
       throw new QuizApiError('Quiz session not found', 404);
     }
 
+    if (session.userId !== input.userId) {
+      throw new QuizApiError('You are not allowed to submit this session', 403);
+    }
+
     if (session.completedAt) {
       throw new QuizApiError('Quiz session is already submitted', 409);
     }
 
-    const responseData = [];
+    const questionIds = [...new Set(input.responses.map((r) => r.questionId))];
+    const questions = await QuizRepository.findQuestionsByIds(questionIds);
+
+    if (questions.length !== questionIds.length) {
+      throw new QuizApiError('One or more questions not found', 404);
+    }
+
+    const questionMap = new Map(questions.map((q) => [q.id, q]));
+
+    const optionIds = [
+      ...new Set(
+        input.responses
+          .filter((r) => r.selectedOptionId)
+          .map((r) => r.selectedOptionId!)
+      ),
+    ];
+
+    const options =
+      optionIds.length > 0
+        ? await QuizRepository.findOptionsByIds(optionIds)
+        : [];
+
+    const optionMap = new Map(options.map((o) => [o.id, o]));
+
+    const responseData: Prisma.QuestionResponseCreateManyInput[] = [];
     let correctCount = 0;
     let totalTimeTaken = 0;
 
     for (const response of input.responses) {
-      const question = await QuizRepository.findQuestionById(
-        response.questionId
-      );
-
-      if (!question) {
+      if (!questionMap.has(response.questionId)) {
         throw new QuizApiError('Question not found', 404);
       }
 
@@ -131,9 +228,7 @@ export class QuizServices {
       let score: number | null = null;
 
       if (response.selectedOptionId) {
-        const selectedOption = await QuizRepository.findOptionById(
-          response.selectedOptionId
-        );
+        const selectedOption = optionMap.get(response.selectedOptionId);
 
         if (!selectedOption) {
           throw new QuizApiError('Selected option not found', 404);
@@ -167,17 +262,36 @@ export class QuizServices {
       });
     }
 
-    await QuizRepository.createQuestionResponses(responseData);
-
-    const totalQuestions = session.totalQuestions || input.responses.length;
+    const totalQuestions = session.totalQuestions ?? input.responses.length;
     const accuracy = calculateAccuracy(correctCount, totalQuestions);
 
-    const updatedSession = await QuizRepository.updateSession(input.sessionId, {
-      correctCount,
-      accuracy,
-      timeTaken: totalTimeTaken,
-      completedAt: new Date(),
+    const updatedSession = await prisma.$transaction(async (tx) => {
+      await QuizRepository.createQuestionResponses(responseData, tx);
+
+      const sess = await QuizRepository.updateSession(
+        input.sessionId,
+        {
+          correctCount,
+          accuracy,
+          timeTaken: totalTimeTaken,
+          completedAt: new Date(),
+        },
+        tx
+      );
+
+      await AnalyticsService.updateStatsAndStreak(
+        session.userId,
+        {
+          totalQuestions,
+          correctCount,
+        },
+        tx
+      );
+
+      return sess;
     });
+
+    await QuizServices.updateUserStats(session.userId);
 
     return {
       session: updatedSession,
@@ -189,5 +303,49 @@ export class QuizServices {
         timeTaken: totalTimeTaken,
       },
     };
+  }
+
+  private static async updateUserStats(userId: string) {
+    const [sessionCount, allResponses] = await Promise.all([
+      QuizRepository.countUserSessions(userId),
+      QuizRepository.getAllResponsesWithDifficulty(userId),
+    ]);
+
+    let totalCorrect = 0;
+    let totalQuestions = 0;
+    let easyCorrect = 0;
+    let easyTotal = 0;
+    let mediumCorrect = 0;
+    let mediumTotal = 0;
+    let hardCorrect = 0;
+    let hardTotal = 0;
+
+    for (const r of allResponses) {
+      totalQuestions++;
+      if (r.isCorrect) totalCorrect++;
+
+      const diff = r.question.difficulty;
+      if (diff === 'EASY') {
+        easyTotal++;
+        if (r.isCorrect) easyCorrect++;
+      } else if (diff === 'MEDIUM') {
+        mediumTotal++;
+        if (r.isCorrect) mediumCorrect++;
+      } else if (diff === 'HARD') {
+        hardTotal++;
+        if (r.isCorrect) hardCorrect++;
+      }
+    }
+
+    await QuizRepository.upsertUserStats(userId, {
+      userId,
+      totalSessions: sessionCount,
+      totalQuestions,
+      totalCorrect,
+      overallAccuracy: calculateAccuracy(totalCorrect, totalQuestions),
+      easyAccuracy: calculateAccuracy(easyCorrect, easyTotal),
+      mediumAccuracy: calculateAccuracy(mediumCorrect, mediumTotal),
+      hardAccuracy: calculateAccuracy(hardCorrect, hardTotal),
+    });
   }
 }

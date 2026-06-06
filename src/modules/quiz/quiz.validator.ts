@@ -43,6 +43,7 @@ export const startQuizSchema = z.object({
 
 export const submitQuizSchema = z.object({
   sessionId: z.string().uuid(),
+  userId: z.string().uuid(),
   responses: z
     .array(
       z

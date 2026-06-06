@@ -102,7 +102,7 @@ export default function ChapterContent({
 
       {hasMarkdown ? (
         <MarkdownRenderer content={chapter.content ?? ''} />
-      ) : (
+      ) : chapter.pdf ? (
         <div className="border border-primary/15 bg-white p-6">
           <NotebookText className="mb-4 h-6 w-6 text-primary/60" />
           <h2 className="text-2xl font-bold text-primary">
@@ -111,6 +111,17 @@ export default function ChapterContent({
           <p className="mt-3 max-w-2xl text-primary/70">
             This chapter is available in the NCERT PDF, but learner-facing
             markdown has not been seeded yet.
+          </p>
+        </div>
+      ) : (
+        <div className="border border-primary/15 bg-white p-6">
+          <NotebookText className="mb-4 h-6 w-6 text-primary/60" />
+          <h2 className="text-2xl font-bold text-primary">
+            Content not yet available
+          </h2>
+          <p className="mt-3 max-w-2xl text-primary/70">
+            Content for this chapter has not been added yet. Please check
+            back later.
           </p>
         </div>
       )}
