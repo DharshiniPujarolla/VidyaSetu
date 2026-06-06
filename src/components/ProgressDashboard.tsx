@@ -103,12 +103,20 @@ function ProgressDashboard({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Overall Progress
+            </CardTitle>
             <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{displayData.overallPercentage ?? 0}%</div>
-            <ProgressBar value={displayData.overallPercentage ?? 0} size="sm" showLabel={false} />
+            <div className="text-2xl font-bold">
+              {displayData.overallPercentage ?? 0}%
+            </div>
+            <ProgressBar
+              value={displayData.overallPercentage ?? 0}
+              size="sm"
+              showLabel={false}
+            />
           </CardContent>
         </Card>
 
@@ -118,7 +126,9 @@ function ProgressDashboard({
             <BookOpen className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{displayData.totalQuizzes ?? 0}</div>
+            <div className="text-2xl font-bold">
+              {displayData.totalQuizzes ?? 0}
+            </div>
             <p className="text-xs text-muted-foreground">Total attempts</p>
           </CardContent>
         </Card>
@@ -144,7 +154,9 @@ function ProgressDashboard({
             <Award className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{displayData.streakDays ?? 0}</div>
+            <div className="text-2xl font-bold">
+              {displayData.streakDays ?? 0}
+            </div>
             <p className="text-xs text-muted-foreground">Days active</p>
           </CardContent>
         </Card>
@@ -162,7 +174,13 @@ function ProgressDashboard({
                 label={subject.subject}
                 value={subject.percentage}
                 size="md"
-                color={subject.percentage >= 80 ? 'success' : subject.percentage >= 50 ? 'warning' : 'primary'}
+                color={
+                  subject.percentage >= 80
+                    ? 'success'
+                    : subject.percentage >= 50
+                      ? 'warning'
+                      : 'primary'
+                }
               />
             ))}
           </CardContent>
@@ -232,10 +250,7 @@ function ProgressDashboard({
           <CardContent>
             <div className="flex flex-col divide-y divide-border/50">
               {displayData.recentChapters?.map((ch, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between py-2"
-                >
+                <div key={i} className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-2">
                     <Target className="size-4 text-muted-foreground" />
                     <span className="text-sm">{ch.chapter}</span>
@@ -243,7 +258,9 @@ function ProgressDashboard({
                   <span
                     className={cn(
                       'text-xs font-medium',
-                      ch.completed ? 'text-emerald-600' : 'text-muted-foreground'
+                      ch.completed
+                        ? 'text-emerald-600'
+                        : 'text-muted-foreground'
                     )}
                   >
                     {ch.completed ? 'Completed' : `${ch.score}%`}

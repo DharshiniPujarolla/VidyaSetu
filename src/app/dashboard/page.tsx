@@ -179,7 +179,9 @@ export default function DashboardPage() {
       {/* top */}
       <div className="flex justify-between">
         <div>
-          <p className="text-3xl font-bold">Welcome back, {user?.name ? user.name: user?.email.split("@")[0]}!</p>
+          <p className="text-3xl font-bold">
+            Welcome back, {user?.name ? user.name : user?.email.split('@')[0]}!
+          </p>
 
           <p className="text-[14px] text-accent  font-light ">
             Focus remains your greatest asset. Continue your curriculum below.
@@ -263,7 +265,7 @@ export default function DashboardPage() {
 
       {/* learning progress */}
 
-      <div className='flex flex-col gap-4 w-full h-full flex-1'>
+      <div className="flex flex-col gap-4 w-full h-full flex-1">
         <div className="flex justify-between font-bold uppercase text-[12px]">
           <div>learning progress </div>
         </div>
