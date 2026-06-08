@@ -128,7 +128,7 @@ export default function Page() {
                   </div>
                 </div>
                 <a
-                  className="bg-white text-[14px] font-bold p-3 mt-4 text-center hover:bg-primary cursor-pointer hover:text-white transition-all duration-300"
+                  className="bg-white text-black text-[14px] font-bold p-3 mt-4 text-center hover:bg-primary cursor-pointer hover:text-white transition-all duration-300"
                   href={`/ncert/${user?.user?.class}/${val.id}`}
                 >
                   VIEW CURRICULUM
