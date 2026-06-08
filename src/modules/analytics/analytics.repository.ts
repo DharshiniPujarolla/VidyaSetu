@@ -161,7 +161,10 @@ export default class AnalyticsRepository {
       prisma.quizSession.findMany({
         where: {
           userId,
-          completedAt: { gte: startDate },
+          completedAt: {
+            not: null,
+            gte: startDate,
+          },
         },
         select: { completedAt: true },
       }),
@@ -169,6 +172,7 @@ export default class AnalyticsRepository {
         where: {
           userId,
           createdAt: { gte: startDate },
+          deletedAt: null,
         },
         select: { createdAt: true },
       }),

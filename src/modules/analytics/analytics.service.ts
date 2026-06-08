@@ -152,29 +152,29 @@ export default class AnalyticsService {
     oneYearAgo.setDate(oneYearAgo.getDate() - 364);
     oneYearAgo.setHours(0, 0, 0, 0);
 
-    const [sessions, notes] = await Promise.all([
-      AnalyticsRepository.getCompletedSessionDates(userId, oneYearAgo),
-      prisma.note.findMany({
-        where: {
-          userId,
-          createdAt: { gte: oneYearAgo },
-          deletedAt: null,
-        },
-        select: { createdAt: true },
-      }),
-    ]);
+    const { sessions, notes } = await AnalyticsRepository.getActivityOverview(
+      userId,
+      oneYearAgo
+    );
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const activityByDate = new Map<string, { quizzes: number; notes: number; total: number }>();
+    const activityByDate = new Map<
+      string,
+      { quizzes: number; notes: number; total: number }
+    >();
 
     for (const s of sessions) {
       if (!s.completedAt) continue;
       const d = new Date(s.completedAt);
       d.setHours(0, 0, 0, 0);
       const key = dateToKey(d);
-      const entry = activityByDate.get(key) || { quizzes: 0, notes: 0, total: 0 };
+      const entry = activityByDate.get(key) || {
+        quizzes: 0,
+        notes: 0,
+        total: 0,
+      };
       entry.quizzes += 1;
       entry.total += 1;
       activityByDate.set(key, entry);
@@ -185,7 +185,11 @@ export default class AnalyticsService {
       const d = new Date(n.createdAt);
       d.setHours(0, 0, 0, 0);
       const key = dateToKey(d);
-      const entry = activityByDate.get(key) || { quizzes: 0, notes: 0, total: 0 };
+      const entry = activityByDate.get(key) || {
+        quizzes: 0,
+        notes: 0,
+        total: 0,
+      };
       entry.notes += 1;
       entry.total += 1;
       activityByDate.set(key, entry);
