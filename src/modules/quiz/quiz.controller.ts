@@ -49,6 +49,15 @@ const handleQuizError = (error: unknown) => {
     );
   }
 
+  if (error instanceof Error && (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError')) {
+    return NextResponse.json(
+      {
+        message: 'Session expired. Please log in again.',
+      },
+      { status: 401 }
+    );
+  }
+
   return NextResponse.json(
     {
       message: 'Internal server error',
