@@ -34,7 +34,9 @@ export default function NcertChapterPage() {
 
       const res = await authFetch({
         url,
-        options: { method: 'GET' },
+        options: {
+          method: 'GET',
+        },
       });
 
       if (res.status !== 200 || !res.message) {
@@ -47,8 +49,7 @@ export default function NcertChapterPage() {
         return;
       }
 
-      const chapterData = res.message as ChapterProps;
-      setChapter(chapterData);
+      setChapter(res.message);
     } catch {
       setChapter(null);
       setError('Unable to load this chapter. Please try again later.');

@@ -2,9 +2,8 @@
 import Button from '@/components/Button';
 import authFetch from '@/lib/auth/authFetch';
 import { useRouter } from 'next/navigation';
-import { useKeyboardNav } from '@/hooks/useKeyboardNav';
-import { KeyboardHelpOverlay } from '@/components/KeyboardHelpOverlay';
-import { useCallback } from 'react';
+import React, { use, useEffect } from 'react';
+import { da } from 'zod/locales';
 
 export default function Page() {
   const router = useRouter();
@@ -41,7 +40,10 @@ export default function Page() {
   ];
 
   const selectClass = async (cal: string) => {
-    const data = { class: cal };
+    const data = {
+      class: cal,
+    };
+
     const payload = JSON.stringify(data);
     const user = await authFetch({
       url: '/api/user/updateUser',
@@ -50,27 +52,16 @@ export default function Page() {
         body: payload,
       },
     });
+
     if (user.message.class) {
       router.push(`/ncert/${user.message.class}`);
     }
   };
 
-  const handleBack = useCallback(() => {
-    router.push('/dashboard');
-  }, [router]);
-
-  const { selectedIndex, showHelp, setShowHelp } = useKeyboardNav({
-    itemCount: classData.length,
-    onSelect: (index) => selectClass(classData[index].class),
-    onBack: handleBack,
-  });
-
   return (
     <div className="bg-background min-h-screen flex flex-col gap-24">
-      <KeyboardHelpOverlay open={showHelp} onClose={() => setShowHelp(false)} />
-
       <div className="flex flex-col p-12 gap-12">
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2  items-center">
           <div className="h-[2px] bg-primary w-16"></div>
           <p className="text-[14px] font-semibold">DEFINING PATHFINDERS</p>
         </div>
@@ -81,13 +72,6 @@ export default function Page() {
             <p className="text-[16px] font-normal pt-4 w-[40%] leading-5 text-primary/80">
               The Monolith curriculum adapts to your current level of rigor.
               Choose your academic standing to initialize the curation engine.
-            </p>
-            <p className="text-[12px] text-primary/40 mt-2">
-              Press{' '}
-              <kbd className="px-1 py-0.5 bg-gray-100 rounded text-[11px] font-mono">
-                ?
-              </kbd>{' '}
-              for keyboard shortcuts
             </p>
           </div>
           <div className="flex justify-end flex-col items-end gap-2">
@@ -104,19 +88,13 @@ export default function Page() {
         </div>
 
         <div className="flex gap-8 pt-12">
-          {classData.map((val, index) => {
-            const isSelected = index === selectedIndex;
+          {classData.map((val) => {
             return (
               <div
                 key={val.title}
-                className={`flex flex-col w-[20%] bg-white p-8 gap-8 relative group hover:bg-primary transition-all duration-500 hover:text-white z-3 cursor-pointer ${
-                  isSelected
-                    ? 'ring-2 ring-primary ring-offset-2 bg-primary text-white'
-                    : ''
-                }`}
-                onClick={() => selectClass(val.class)}
+                className="flex flex-col w-[20%] bg-white p-8 gap-8 relative group hover:bg-primary transition-all duration-500 hover:text-white z-3"
               >
-                <div className="absolute text-[240px] -right-3 -top-8 font-extrabold text-accent/40 -z-1">
+                <div className="absolute text-[240px]  -right-3 -top-8  font-extrabold text-accent/40 -z-1">
                   {val.class}
                 </div>
                 <p className="text-[14px] tracking-[4px] w-[80%] font-bold text-primary/70 group transition-all duration-300 group-hover:text-white/60">
@@ -128,7 +106,7 @@ export default function Page() {
                   {val.dis}
                 </p>
                 <div>
-                  <div className="flex gap-2 items-center text-[14px] font-bold text-accent group transition-all duration-300 group-hover:text-white/60">
+                  <div className="flex gap-2 items-center text-[14px] font-bold text-accent group transition-all duration-300 group-hover:text-white/60 ">
                     <svg
                       width="11"
                       height="11"
@@ -139,12 +117,12 @@ export default function Page() {
                       <path
                         d="M4.4109 7.52949L8.14199 3.7984L7.72917 3.38558L4.4109 6.70385L2.7484 5.04135L2.33558 5.45417L4.4109 7.52949V7.52949M5.25195 10.5C4.52597 10.5 3.84343 10.3622 3.20432 10.0867C2.5652 9.8112 2.00926 9.43728 1.5365 8.96495C1.06373 8.49263 0.689453 7.93721 0.413672 7.2987C0.137891 6.66018 0 5.97793 0 5.25195C0 4.52597 0.137761 3.84343 0.413284 3.20432C0.688807 2.5652 1.06273 2.00926 1.53506 1.5365C2.00738 1.06373 2.5628 0.689453 3.20131 0.413672C3.83983 0.137891 4.52207 0 5.24805 0C5.97403 0 6.65658 0.137761 7.29569 0.413284C7.9348 0.688807 8.49074 1.06273 8.96351 1.53506C9.43628 2.00738 9.81055 2.5628 10.0863 3.20131C10.3621 3.83983 10.5 4.52207 10.5 5.24805C10.5 5.97403 10.3622 6.65658 10.0867 7.29569C9.8112 7.9348 9.43728 8.49074 8.96495 8.96351C8.49263 9.43628 7.93721 9.81055 7.2987 10.0863C6.66018 10.3621 5.97794 10.5 5.25195 10.5V10.5M5.25 9.91667C6.55278 9.91667 7.65625 9.46459 8.56042 8.56042C9.46459 7.65625 9.91667 6.55278 9.91667 5.25C9.91667 3.94723 9.46459 2.84375 8.56042 1.93959C7.65625 1.03542 6.55278 0.583337 5.25 0.583337C3.94723 0.583337 2.84375 1.03542 1.93959 1.93959C1.03542 2.84375 0.583337 3.94723 0.583337 5.25C0.583337 6.55278 1.03542 7.65625 1.93959 8.56042C2.84375 9.46459 3.94723 9.91667 5.25 9.91667V9.91667M5.25 5.25V5.25V5.25V5.25V5.25V5.25V5.25V5.25V5.25V5.25"
                         fill="#828282"
-                        fill-opacity="0.7"
+                        fillOpacity="0.7"
                       />
                     </svg>
                     <p>{val.points[0]}</p>
                   </div>
-                  <div className="flex gap-2 items-center text-[14px] font-bold text-accent">
+                  <div className="flex gap-2 items-center text-[14px] font-bold text-accent ">
                     <svg
                       width="11"
                       height="11"
@@ -155,12 +133,13 @@ export default function Page() {
                       <path
                         d="M4.4109 7.52949L8.14199 3.7984L7.72917 3.38558L4.4109 6.70385L2.7484 5.04135L2.33558 5.45417L4.4109 7.52949V7.52949M5.25195 10.5C4.52597 10.5 3.84343 10.3622 3.20432 10.0867C2.5652 9.8112 2.00926 9.43728 1.5365 8.96495C1.06373 8.49263 0.689453 7.93721 0.413672 7.2987C0.137891 6.66018 0 5.97793 0 5.25195C0 4.52597 0.137761 3.84343 0.413284 3.20432C0.688807 2.5652 1.06273 2.00926 1.53506 1.5365C2.00738 1.06373 2.5628 0.689453 3.20131 0.413672C3.83983 0.137891 4.52207 0 5.24805 0C5.97403 0 6.65658 0.137761 7.29569 0.413284C7.9348 0.688807 8.49074 1.06273 8.96351 1.53506C9.43628 2.00738 9.81055 2.5628 10.0863 3.20131C10.3621 3.83983 10.5 4.52207 10.5 5.24805C10.5 5.97403 10.3622 6.65658 10.0867 7.29569C9.8112 7.9348 9.43728 8.49074 8.96495 8.96351C8.49263 9.43628 7.93721 9.81055 7.2987 10.0863C6.66018 10.3621 5.97794 10.5 5.25195 10.5V10.5M5.25 9.91667C6.55278 9.91667 7.65625 9.46459 8.56042 8.56042C9.46459 7.65625 9.91667 6.55278 9.91667 5.25C9.91667 3.94723 9.46459 2.84375 8.56042 1.93959C7.65625 1.03542 6.55278 0.583337 5.25 0.583337C3.94723 0.583337 2.84375 1.03542 1.93959 1.93959C1.03542 2.84375 0.583337 3.94723 0.583337 5.25C0.583337 6.55278 1.03542 7.65625 1.93959 8.56042C2.84375 9.46459 3.94723 9.91667 5.25 9.91667V9.91667M5.25 5.25V5.25V5.25V5.25V5.25V5.25V5.25V5.25V5.25V5.25"
                         fill="#828282"
-                        fill-opacity="0.7"
+                        fillOpacity="0.7"
                       />
                     </svg>
                     <p>{val.points[1]}</p>
                   </div>
                 </div>
+
                 <Button
                   text="SELECT TIER"
                   color="bg-accent/40"
@@ -176,9 +155,9 @@ export default function Page() {
 
         <div className="flex pt-24 justify-around items-stretch">
           <div className="flex-1 flex flex-col gap-4">
-            <p className="text-[48px] leading-14 font-extralight text-primary/70">
-              &quot;The pursuit of knowledge is not a linear journey, but an
-              architectural endeavor of the mind.&quot;
+            <p className="text-[48px] leading-14 font-extralight text-primary/70 ">
+              "The pursuit of knowledge is not a linear journey, but an
+              architectural endeavor of the mind."
             </p>
             <div>
               <p className="font-bold text-[14px]">DR. ALISTAIR VANCE</p>
@@ -187,8 +166,8 @@ export default function Page() {
               </p>
             </div>
           </div>
-          <div className="flex-1 bg-accent/40">
-            <div className="p-8 flex flex-col justify-end h-full gap-2">
+          <div className="flex-1 bg-accent/40 ">
+            <div className=" p-8 flex flex-col justify-end h-full gap-2">
               <p className="font-semibold text-xl">Need assistance?</p>
               <p className="w-[80%]">
                 If you are unsure which tier aligns with your current research
@@ -202,12 +181,12 @@ export default function Page() {
       </div>
 
       <div className="border-t border-t-accent/20">
-        <div className="flex justify-between pl-12 pr-12 p-4 items-center">
+        <div className="flex justify-between pl-12 pr-12 p-4 items-center ">
           <div className="text-[10px] font-bold gap-8 flex text-primary/60">
             <p>© 2026 THE MONOLITH ACADEMY</p>
             <p>CURATED IN SONIPAT</p>
           </div>
-          <div className="flex justify-center items-center gap-2">
+          <div className="flex  justify-center items-center gap-2">
             <svg
               width="14"
               height="14"
