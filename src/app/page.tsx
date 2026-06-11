@@ -32,12 +32,12 @@ useEffect(() => {
     fetchUser();
   }, []);
   return (
-    <div className="flex flex-col h-max w-full bg-background  ">
-      <div className="flex  flex-col min-h-screen  p-4 pl-8 pr-8 ">
-        <div className="w-full h-10 flex justify-between items-center">
-          <p className="text-2xl uppercase tracking-tighter font-bold">
+    <div className="flex flex-col h-max w-full bg-background ">
+      <div className="flex min-h-screen flex-col px-6 pt-6 pb-12 md:px-10 xl:mx-auto xl:w-full xl:max-w-[1440px] xl:px-16">
+        <div className="flex h-12 w-full items-center justify-between">
+          <Link href="/" className="text-2xl uppercase tracking-tighter font-bold">
             Vidyasetu
-          </p>
+          </Link>
           <div className="flex items-center gap-4">
             <svg
               width="15"
@@ -67,23 +67,22 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="pt-20 flex flex-col md:flex-row">
-          <div className="flex-1 flex flex-col gap-8">
-            <p className="uppercase text-[12px] tracking-wider] text-secondary ">
-              the digital curator
+        <div className="flex flex-col gap-10 pt-16 md:pt-20 lg:flex-row lg:items-center lg:gap-14 xl:pt-24">
+          <div className="flex-1 flex flex-col gap-7 lg:gap-9">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-secondary/90">
+              Built for Classes 9-12
             </p>
-            <p className="text-[40px] md:text-[80px] font-light md:leading-24">
-              <span className="">Master NCERT with</span> AI-Powered Smart
-              Quizzes
+            <p className="max-w-[18ch] text-[40px] font-light leading-[1.03] sm:text-[52px] lg:text-[62px] xl:text-[74px] 2xl:text-[82px]">
+              Study NCERT better, one focused session at a time.
             </p>
-            <p className="text-secondary w-[80%]">
-              Precision-engineered learning for competitive excellence. Our AI
-              decodes complex NCERT patterns to curate academic sessions that
-              adapt to your cognitive pace.
+            <p className="max-w-[56ch] text-secondary md:text-[17px] md:leading-8">
+              Start a quiz from any chapter, spot weak topics quickly, and
+              revise with clear feedback. No noise, just steady progress you
+              can track.
             </p>
-            <div className="flex gap-4 w-full md:w-[60%] pt-8">
+            <div className="flex w-full flex-col gap-4 pt-6 sm:flex-row lg:w-[70%] xl:w-[62%]">
               <Button
-                text="get started"
+                text="start now"
                 action={() => router.push('/dashboard')}
                 color=""
                 textCol=""
@@ -91,7 +90,7 @@ useEffect(() => {
                 hover=""
               />
               <Button
-                text="view curriculam"
+                text="browse ncert"
                 action={() => router.push('/ncert')}
                 color=""
                 textCol=""
@@ -100,12 +99,17 @@ useEffect(() => {
               />
             </div>
           </div>
-          <div className="flex-1 md:flex md:justify-end relative hidden ">
-            <Image src={Senv} width={540} alt="bg" className="h-full"></Image>
-            <div className=" flex flex-col justify-center items-center uppercase w-32 shadow-xs h-24 bg-white absolute -bottom-8 left-40">
+          <div className="relative hidden flex-1 lg:flex lg:justify-end">
+            <Image
+              src={Senv}
+              width={620}
+              alt="Study environment"
+              className="h-auto w-[520px] object-contain grayscale-[8%] xl:w-[620px]"
+            ></Image>
+            <div className="absolute -bottom-5 left-14 flex h-24 w-40 flex-col items-center justify-center bg-white shadow-xs xl:left-24">
               <div>
-                <p className="font-bold text-xl">98%</p>
-                <p className="text-[12px] text-secondary">Retention Rate</p>
+                <p className="text-xl font-bold">98%</p>
+                <p className="text-[12px] text-secondary">Weekly goal completion</p>
               </div>
             </div>
           </div>
