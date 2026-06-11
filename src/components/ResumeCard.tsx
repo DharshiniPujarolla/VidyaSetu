@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,8 +8,7 @@ interface ReadingProgress {
   chapterUrl: string;
   subjectName?: string;
   className?: string;
-  progressPercent: number; // 0–100
-  lastVisited: string; // ISO date string
+  lastVisited: string;
 }
 
 const STORAGE_KEY = 'vidyasetu_last_read';
@@ -29,7 +28,8 @@ export default function ResumeCard() {
   const [progress, setProgress] = useState<ReadingProgress | null>(null);
 
   useEffect(() => {
-    setProgress(getProgress());
+    const saved = getProgress();
+    setProgress(saved);
   }, []);
 
   if (!progress) return null;
@@ -71,37 +71,21 @@ export default function ResumeCard() {
           </svg>
         </div>
 
-        {/* Progress bar */}
-        <div className="w-full bg-accent/20 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-primary h-full transition-all duration-500 rounded-full"
-            style={{
-              width: `${Math.min(100, Math.max(0, progress.progressPercent))}%`,
-            }}
-          />
-        </div>
         <div className="flex justify-between text-[10px] text-secondary/60 font-medium">
-          <span>{progress.progressPercent}% completed</span>
-          <span>
-            Last read: {new Date(progress.lastVisited).toLocaleDateString()}
-          </span>
+          <span>Last read: {new Date(progress.lastVisited).toLocaleDateString()}</span>
         </div>
       </div>
     </div>
   );
 }
 
-/** Save progress to localStorage (call this from the chapter reading page) */
 export function saveReadingProgress(
-  data: Omit<ReadingProgress, 'lastVisited' | 'progressPercent'> & {
-    progressPercent?: number;
-  }
+  data: Omit<ReadingProgress, 'lastVisited'>
 ) {
   if (typeof window === 'undefined') return;
   try {
     const payload: ReadingProgress = {
       ...data,
-      progressPercent: data.progressPercent ?? 0,
       lastVisited: new Date().toISOString(),
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
