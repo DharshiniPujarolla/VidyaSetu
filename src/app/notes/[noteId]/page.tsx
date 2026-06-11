@@ -10,18 +10,33 @@ export default function NotePage() {
   const params = useParams();
   const [note, setNote] =
     useState<Note | null>(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    authFetch({
-      url: `/api/notes/${params.noteId}`,
-      options: {
-        method: 'GET',
-      },
-    }).then((res) => {
-      setNote(res.data);
-    });
-  }, [params.noteId]);
+    const loadNote = async () => {
+      try {
+        const res = await authFetch({
+          url: `/api/notes/${params.noteId}`,
+          options: {
+            method: 'GET',
+          },
+        });
 
+        setNote(res.data);
+      } catch {
+        setError('Failed to load note');
+      }
+    };
+
+    loadNote();
+  }, [params.noteId]);
+  if (error) {
+    return (
+      <div className="p-6 text-red-600">
+        {error}
+      </div>
+    );
+  }
   if (!note) {
     return <div>Loading...</div>;
   }
