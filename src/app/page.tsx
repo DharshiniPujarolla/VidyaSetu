@@ -32,7 +32,7 @@ useEffect(() => {
     fetchUser();
   }, []);
   return (
-    <div className="flex flex-col h-max w-screen bg-background">
+    <div className="flex flex-col h-max w-full bg-background ">
       <div className="flex min-h-screen flex-col px-6 pt-6 pb-12 md:px-10 xl:mx-auto xl:w-full xl:max-w-[1440px] xl:px-16">
         <div className="flex h-12 w-full items-center justify-between">
           <Link href="/" className="text-2xl uppercase tracking-tighter font-bold">
