@@ -150,9 +150,7 @@ const components: Components = {
     // Extract language from the nested <code> element's className
     const codeEl = Array.isArray(children) ? children[0] : children;
     const codeClass =
-      codeEl &&
-      typeof codeEl === 'object' &&
-      'props' in (codeEl as object)
+      codeEl && typeof codeEl === 'object' && 'props' in (codeEl as object)
         ? (codeEl as React.ReactElement<{ className?: string }>).props.className
         : undefined;
     const match = /language-(\w+)/.exec(codeClass || '');
