@@ -24,31 +24,58 @@ describe('BookmarkService.createBookmark', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-  it('returns existing bookmark when duplicate bookmark is created', async () => {
-    const existingBookmark = {
-        id: 'bookmark-1',
-        userId: 'user-1',
-        chapterId: 'chapter-1',
-        chapter: {
-            id: 'chapter-1',
-        },
+  it('creates a bookmark successfully when it does not already exist', async () => {
+    const createdBookmark = {
+      id: 'bookmark-1',
+      userId: 'user-1',
+      chapterId: 'chapter-1',
+      chapter: {
+        id: 'chapter-1',
+      },
     };
 
     mocks.chapterFindUnique.mockResolvedValue({
-        id: 'chapter-1',
+      id: 'chapter-1',
     });
 
-     mocks.bookmarkCreate.mockRejectedValue({
-        code: 'P2002',
+    mocks.bookmarkCreate.mockResolvedValue(createdBookmark);
+
+    const result = await BookmarkService.createBookmark('user-1', 'chapter-1');
+
+    expect(mocks.bookmarkCreate).toHaveBeenCalledWith({
+      data: {
+        userId: 'user-1',
+        chapterId: 'chapter-1',
+      },
+      include: {
+        chapter: true,
+      },
+    });
+
+    expect(result).toEqual(createdBookmark);
+  });
+  it('returns existing bookmark when duplicate bookmark is created', async () => {
+    const existingBookmark = {
+      id: 'bookmark-1',
+      userId: 'user-1',
+      chapterId: 'chapter-1',
+      chapter: {
+        id: 'chapter-1',
+      },
+    };
+
+    mocks.chapterFindUnique.mockResolvedValue({
+      id: 'chapter-1',
+    });
+
+    mocks.bookmarkCreate.mockRejectedValue({
+      code: 'P2002',
     });
 
     mocks.bookmarkFindFirst.mockResolvedValue(existingBookmark);
 
-    const result = await BookmarkService.createBookmark(
-        'user-1',
-        'chapter-1'
-    );
+    const result = await BookmarkService.createBookmark('user-1', 'chapter-1');
 
-     expect(result).toEqual(existingBookmark);
-    });
+    expect(result).toEqual(existingBookmark);
+  });
 });
