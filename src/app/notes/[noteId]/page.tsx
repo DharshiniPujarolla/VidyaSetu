@@ -21,6 +21,11 @@ export default function NotePage() {
           },
         });
 
+        if (res?.status === 401 || res?.status === 404 || res?.status === 500) {
+          setError(res.message || 'Failed to load note');
+          return;
+        }
+
         setNote(res.data);
       } catch {
         setError('Failed to load note');

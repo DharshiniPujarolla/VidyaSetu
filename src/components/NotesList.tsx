@@ -61,18 +61,25 @@ export default function NotesList({ notes }: NotesListProps) {
         rounded
       "
               onClick={async () => {
-                try {
-                  await authFetch({
-                    url: `/api/notes/${note.id}`,
-                    options: {
-                      method: 'DELETE',
-                    },
-                  });
+                setError('');
 
-                  setDeletedIds((prev) => [...prev, note.id]);
-                } catch {
-                  setError('Failed to delete note');
+                const response = await authFetch({
+                  url: `/api/notes/${note.id}`,
+                  options: {
+                    method: 'DELETE',
+                  },
+                });
+
+                if (
+                  response?.status === 401 ||
+                  response?.status === 404 ||
+                  response?.status === 500
+                ) {
+                  setError(response.message || 'Failed to delete note');
+                  return;
                 }
+
+                setDeletedIds((prev) => [...prev, note.id]);
               }}
             >
               Delete
