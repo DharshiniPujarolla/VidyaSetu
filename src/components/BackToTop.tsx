@@ -12,8 +12,7 @@ export default function BackToTop() {
       const scrollTop = window.scrollY;
       const docHeight =
         document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent =
-        docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
 
       setProgress(scrollPercent);
       setVisible(scrollTop > 300);
@@ -41,10 +40,7 @@ export default function BackToTop() {
       aria-label="Back to top"
       className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg transition-all hover:bg-gray-50"
     >
-      <svg
-        className="absolute h-14 w-14 -rotate-90"
-        viewBox="0 0 56 56"
-      >
+      <svg className="absolute h-14 w-14 -rotate-90" viewBox="0 0 56 56">
         <circle
           cx="28"
           cy="28"

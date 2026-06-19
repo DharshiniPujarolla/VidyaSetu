@@ -23,7 +23,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${manrope.variable}  antialiased `}>
         <MainLayout>{children}</MainLayout>
-<BackToTop />
+        <BackToTop />
       </body>
     </html>
   );
